@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>졸업식 D-Day & 등교일 위젯 | 태블릿 스탠드 & 전자칠판</title>
+  <meta name="description" content="태블릿 거치대 위젯 및 전자칠판용 졸업식 D-Day와 순수 등교일 스마트 카운터">
+  
+  <!-- 태블릿 PWA 및 홈 화면 전체화면(위젯화) 지원 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="졸업D-Day">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <!-- 웹폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========================================================
+       디자인 시스템 & 위젯 테마 팔레트
+    ======================================================== */
+    :root {
+      /* 기본 라이트 테마 */
+      --bg-gradient: radial-gradient(circle at 10% 20%, #f1f5f9 0%, #e2e8f0 90%);
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-subtle: rgba(255, 255, 255, 0.65);
+      --border-card: rgba(255, 255, 255, 0.8);
+      --border-subtle: rgba(203, 213, 225, 0.7);
+
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --primary-subtle: #e0e7ff;
+      --primary-gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
+
+      --school-accent: #2563eb;
+      --school-bg: rgba(37, 99, 235, 0.1);
+      --school-border: rgba(37, 99, 235, 0.25);
+
+      --dday-accent: #e11d48;
+      --dday-gradient: linear-gradient(135deg, #e11d48, #ec4899);
+
+      --color-weekend: #ea580c;
+      --color-weekend-bg: rgba(234, 88, 12, 0.1);
+      --color-holiday: #dc2626;
+      --color-holiday-bg: rgba(220, 38, 38, 0.1);
+      --color-custom: #7c3aed;
+      --color-custom-bg: rgba(124, 58, 237, 0.1);
+      --color-lunch: #059669;
+      --color-lunch-bg: rgba(5, 150, 105, 0.1);
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --radius-widget: 28px;
+
+      --shadow-widget: 0 16px 36px -10px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(255, 255, 255, 0.7) inset;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+      --font-base: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+      --font-display: 'Outfit', 'Pretendard', sans-serif;
+      --transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 다크 모드 (OLED 태블릿 배터리 절약 & 야간 모드) */
+    body.theme-dark {
+      --bg-gradient: radial-gradient(circle at 10% 20%, #0b0f19 0%, #111827 90%);
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --bg-card-subtle: rgba(30, 41, 59, 0.65);
+      --border-card: rgba(255, 255, 255, 0.1);
+      --border-subtle: rgba(51, 65, 85, 0.6);
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-light: #64748b;
+
+      --primary-subtle: rgba(99, 102, 241, 0.22);
+      --school-bg: rgba(59, 130, 246, 0.2);
+      --school-border: rgba(96, 165, 250, 0.3);
+      --color-weekend-bg: rgba(249, 115, 22, 0.2);
+      --color-holiday-bg: rgba(239, 68, 68, 0.2);
+      --color-custom-bg: rgba(168, 85, 247, 0.2);
+      --color-lunch-bg: rgba(16, 185, 129, 0.2);
+
+      --shadow-widget: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.12) inset;
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 감성 벚꽃 테마 (Pink Glow) */
+    body.theme-sakura {
+      --bg-gradient: radial-gradient(circle at 10% 20%, #fdf2f8 0%, #fce7f3 90%);
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --bg-card-subtle: rgba(253, 242, 248, 0.7);
+      --border-card: rgba(244, 114, 182, 0.3);
+      --text-main: #831843;
+      --text-muted: #9d174d;
+      --primary: #db2777;
+      --primary-light: #ec4899;
+      --primary-subtle: #fce7f3;
+      --school-accent: #be185d;
+      --dday-accent: #e11d48;
+      --shadow-widget: 0 16px 36px -10px rgba(219, 39, 119, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
+    }
+
+    /* 포레스트 민트 테마 (Mint Calm) */
+    body.theme-mint {
+      --bg-gradient: radial-gradient(circle at 10% 20%, #f0fdf4 0%, #dcfce7 90%);
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --bg-card-subtle: rgba(240, 253, 244, 0.7);
+      --border-card: rgba(52, 211, 153, 0.3);
+      --text-main: #064e3b;
+      --text-muted: #047857;
+      --primary: #059669;
+      --primary-light: #10b981;
+      --primary-subtle: #d1fae5;
+      --school-accent: #047857;
+      --dday-accent: #e11d48;
+      --shadow-widget: 0 16px 36px -10px rgba(5, 150, 105, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
+    }
+
+    /* ================= 리셋 & 기본 스타일 ================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: var(--font-base);
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+
+    /* 부드러운 오로라 배경 */
+    .aurora-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.55;
+      animation: floatOrb 22s ease-in-out infinite alternate;
+    }
+    .blob-1 {
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(225, 29, 72, 0.15) 100%);
+      top: -120px;
+      right: -80px;
+    }
+    .blob-2 {
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.35) 0%, rgba(124, 58, 237, 0.18) 100%);
+      bottom: -150px;
+      left: -100px;
+      animation-delay: -7s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(40px, 30px) scale(1.08); }
+      100% { transform: translate(-30px, 45px) scale(0.95); }
+    }
+
+    /* 버튼 기본 */
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      outline: none;
+      user-select: none;
+      transition: var(--transition);
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+
+    /* ================= 상단 위젯 제어 탑바 (태블릿 최적화) ================= */
+    .top-action-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 1rem;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    .app-icon {
+      font-size: 1.8rem;
+      filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.3));
+    }
+    .app-title-wrap h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .app-title-wrap p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    /* 위젯 뷰 모드 스위치 버튼 */
+    .view-mode-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid var(--border-card);
+      box-shadow: var(--shadow-sm);
+    }
+    .mode-tab-btn {
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .mode-tab-btn.active {
+      background: var(--primary-gradient);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      box-shadow: var(--shadow-sm);
+      font-size: 1.15rem;
+      color: var(--text-main);
+    }
+    .icon-btn:hover {
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    /* ================= 1. 태블릿 전용 위젯 뷰 (WIDGET MODE) ================= */
+    .widget-container {
+      position: relative;
+      z-index: 5;
+      max-width: 1100px;
+      margin: 0.5rem auto 1.5rem;
+      padding: 0 1.25rem;
+      transition: var(--transition);
+    }
+
+    /* 위젯 프레임 카드 */
+    .tablet-widget-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1.5px solid var(--border-card);
+      border-radius: var(--radius-widget);
+      box-shadow: var(--shadow-widget);
+      padding: 2.25rem 2.5rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      transition: var(--transition);
+    }
+
+    /* 위젯 상단 인포 바 */
+    .widget-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .widget-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      background: var(--primary-subtle);
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .pulse-ping {
+      position: relative;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dday-accent);
+    }
+    .pulse-ping::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: var(--dday-accent);
+      opacity: 0.7;
+      animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes ping {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+
+    /* 태블릿 현재 시계 & 카운트다운 */
+    .widget-live-clock {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--bg-card-subtle);
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+    .clock-digit-group {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.15rem;
+    }
+    .clock-digit-group strong {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+    .clock-sep {
+      opacity: 0.4;
+      font-weight: 400;
+    }
+
+    /* 위젯 메인: D-DAY & 순수 등교일 (시선 집중 레이아웃) */
+    .widget-main-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1.35fr;
+      align-items: stretch;
+      gap: 2rem;
+    }
+
+    .widget-divider-v {
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--border-subtle), transparent);
+    }
+
+    /* D-Day 섹션 */
+    .widget-dday-cell {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.35rem;
+    }
+    .widget-cell-label {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .widget-dday-value-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 0.2rem;
+    }
+    .widget-dday-prefix {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--dday-accent);
+      line-height: 1;
+    }
+    .widget-dday-number {
+      font-family: var(--font-display);
+      font-size: 5.6rem;
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      background: var(--dday-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .widget-dday-sub {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    /* 순수 등교일 섹션 (위젯의 핵심 킬러 기능) */
+    .widget-school-card {
+      background: var(--school-bg);
+      border: 2px solid var(--school-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.85rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px -6px rgba(37, 99, 235, 0.15);
+    }
+    .widget-school-card::before {
+      content: '🎒';
+      position: absolute;
+      right: 1.25rem;
+      bottom: -0.5rem;
+      font-size: 6.5rem;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+    .widget-school-label {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--school-accent);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .widget-school-value-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+    .widget-school-number {
+      font-family: var(--font-display);
+      font-size: 5.2rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: var(--school-accent);
+    }
+    .widget-school-unit {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--school-accent);
+    }
+    .widget-school-desc {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* 위젯 미니 통계 4분할 바 (급식, 주말, 공휴일, 재량휴업) */
+    .widget-substats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .substat-pill {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: var(--transition);
+    }
+    .substat-pill:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary-light);
+    }
+    .substat-icon {
+      font-size: 1.6rem;
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.5);
+    }
+    body.theme-dark .substat-icon {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .substat-data {
+      display: flex;
+      flex-direction: column;
+    }
+    .substat-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .substat-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--text-main);
+    }
+    .substat-val small {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    /* 위젯 프로그레스 바 */
+    .widget-progress-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .progress-top-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+    .progress-track {
+      height: 14px;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      padding: 2px;
+      gap: 2px;
+    }
+    body.theme-dark .progress-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .prog-bar-school {
+      background: linear-gradient(90deg, #2563eb, #6366f1);
+      border-radius: 999px;
+      transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .prog-bar-rest {
+      background: linear-gradient(90deg, #ea580c, #e11d48);
+      border-radius: 999px;
+      transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .progress-legend-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* 위젯 하단 졸업 응원 한마디 */
+    .widget-quote-ticker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+    }
+    .widget-quote-text {
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .widget-quote-text strong {
+      color: var(--text-main);
+    }
+    .widget-touch-guide {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      font-weight: 700;
+    }
+
+    /* ================= 2. 위젯 전용 스탠드 / 컴팩트 모드 ================= */
+    /* 태블릿 거치대 전용: 풀 화면 위젯 (스크롤 제거, 거치형 시계/위젯처럼) */
+    body.widget-mode-active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      padding: 1rem;
+    }
+    body.widget-mode-active .top-action-bar {
+      position: absolute;
+      top: 0.75rem;
+      left: 1rem;
+      right: 1rem;
+      width: calc(100% - 2rem);
+      max-width: 1100px;
+    }
+    body.widget-mode-active .widget-container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0;
+      padding: 0;
+    }
+    body.widget-mode-active .detail-management-container {
+      display: none !important;
+    }
+    body.widget-mode-active .app-footer {
+      display: none !important;
+    }
+
+    /* ================= 3. 상세 관리 패널 & 스마트 캘린더 (FULL MODE) ================= */
+    .detail-management-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.25rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 1.85rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      gap: 1rem;
+    }
+    .card-header-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* 설정 폼 그리드 */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .input-action-wrap {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .styled-input {
+      flex: 1;
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card-subtle);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+    .styled-input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+    .btn-pill {
+      padding: 0.55rem 0.95rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 800;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+    .btn-pill:hover {
+      border-color: var(--primary-light);
+      color: var(--primary);
+    }
+    .btn-primary-pill {
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-top: 0.25rem;
+    }
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .check-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* 스마트 캘린더 */
+    .calendar-month-tabs {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+    .month-tab {
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: var(--bg-card-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    .month-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 1rem;
+    }
+    .cal-day-header {
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      padding-bottom: 0.4rem;
+    }
+    .cal-day-header.sun { color: var(--color-holiday); }
+    .cal-day-header.sat { color: var(--color-weekend); }
+
+    .cal-cell {
+      min-height: 72px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.45rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+      cursor: pointer;
+      user-select: none;
+    }
+    .cal-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--primary-light);
+    }
+    .cal-cell.empty {
+      background: transparent;
+      border: none;
+      cursor: default;
+      pointer-events: none;
+    }
+    .cal-cell.is-today {
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 12px rgba(79, 70, 229, 0.35);
+    }
+    .cal-cell.is-past {
+      opacity: 0.35;
+    }
+
+    .cal-cell-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cal-cell-num {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+    .cal-cell.type-holiday .cal-cell-num, .cal-cell.is-sun .cal-cell-num { color: var(--color-holiday); }
+    .cal-cell.type-weekend .cal-cell-num, .cal-cell.is-sat .cal-cell-num { color: var(--color-weekend); }
+
+    .cal-chip-today {
+      font-size: 0.65rem;
+      font-weight: 900;
+      background: var(--primary);
+      color: #fff;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    .cal-cell-status {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.35rem;
+      border-radius: 4px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .status-school { background: var(--school-bg); color: var(--school-accent); }
+    .status-weekend { background: var(--color-weekend-bg); color: var(--color-weekend); }
+    .status-holiday { background: var(--color-holiday-bg); color: var(--color-holiday); }
+    .status-custom { background: var(--color-custom-bg); color: var(--color-custom); }
+    .status-grad { background: rgba(225, 29, 72, 0.2); color: var(--dday-accent); font-weight: 900; }
+
+    /* 캘린더 범례 */
+    .cal-legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .legend-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dot-chip {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* 휴일 목록 */
+    .holiday-scroll-box {
+      max-height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-right: 0.4rem;
+    }
+    .holiday-row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+    }
+    .holiday-row-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .tag-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    /* 푸터 */
+    .app-footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      padding: 2rem 1rem;
+      line-height: 1.6;
+    }
+
+    /* ================= 테마 선택 팝오버 ================= */
+    .theme-dropdown {
+      position: relative;
+    }
+    .theme-menu {
+      position: absolute;
+      top: 115%;
+      right: 0;
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-widget);
+      padding: 0.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 140px;
+      z-index: 100;
+    }
+    .theme-menu.show {
+      display: flex;
+      animation: dropAnim 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes dropAnim {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .theme-option-btn {
+      padding: 0.55rem 0.85rem;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .theme-option-btn:hover {
+      background: var(--primary-subtle);
+      color: var(--primary);
+    }
+
+    /* 토스트 알림 */
+    .toast-box {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid var(--border-card);
+      border-radius: 999px;
+      padding: 0.75rem 1.4rem;
+      box-shadow: var(--shadow-widget);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      z-index: 9999;
+      pointer-events: none;
+      animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), toastOut 0.3s ease forwards 2.6s;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    @keyframes toastOut {
+      to { opacity: 0; transform: translate(-50%, -10px); }
+    }
+
+    /* 캔버스 폭죽 레이어 */
+    .confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* 모달 */
+    .dialog-modal {
+      margin: auto;
+      border: none;
+      background: transparent;
+      padding: 1rem;
+    }
+    .dialog-modal::backdrop {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+    }
+    .modal-content-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 1.75rem;
+      max-width: 440px;
+      width: 90vw;
+      box-shadow: var(--shadow-widget);
+    }
+
+    /* ================= 반응형 미디어 쿼리 (태블릿 가로/세로 & 스마트폰) ================= */
+    /* 태블릿 세로 및 소형 태블릿 */
+    @media (max-width: 900px) {
+      .widget-main-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .widget-divider-v {
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--border-subtle), transparent);
+      }
+      .widget-dday-cell {
+        align-items: center;
+        text-align: center;
+      }
+      .widget-substats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .tablet-widget-card {
+        padding: 1.75rem 1.5rem;
+      }
+      .widget-school-number {
+        font-size: 4.25rem;
+      }
+      .widget-dday-number {
+        font-size: 4.5rem;
+      }
+    }
+
+    @media (max-width: 550px) {
+      .top-action-bar {
+        padding: 0.75rem 1rem;
+      }
+      .app-title-wrap h1 {
+        font-size: 1.05rem;
+      }
+      .widget-school-number {
+        font-size: 3.5rem;
+      }
+      .widget-school-unit {
+        font-size: 1.5rem;
+      }
+      .widget-dday-number {
+        font-size: 3.8rem;
+      }
+      .widget-dday-prefix {
+        font-size: 2.8rem;
+      }
+      .calendar-grid {
+        gap: 4px;
+      }
+      .cal-cell {
+        min-height: 56px;
+        padding: 0.25rem;
+      }
+    }
+  </style>
+</head>
+<body class="theme-light">
+  <!-- 부드러운 오로라 배경 블러 -->
+  <div class="aurora-bg" aria-hidden="true">
+    <div class="aurora-blob blob-1"></div>
+    <div class="aurora-blob blob-2"></div>
+  </div>
+
+  <!-- 상단 컨트롤 헤더 -->
+  <header class="top-action-bar">
+    <div class="app-brand">
+      <div class="app-icon">🎓</div>
+      <div class="app-title-wrap">
+        <h1>졸업식 스마트 위젯</h1>
+        <p>태블릿 거치대 &amp; 전자칠판용 순수 등교일 카운터</p>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <!-- 뷰 모드 전환 (위젯 모드 vs 전체 관리 모드) -->
+      <div class="view-mode-toggle">
+        <button id="viewWidgetBtn" class="mode-tab-btn" title="태블릿 스탠드/위젯 전용 깔끔한 뷰">
+          <span>📱 위젯 모드</span>
+        </button>
+        <button id="viewFullBtn" class="mode-tab-btn active" title="캘린더 및 학사일정 상세 관리">
+          <span>📋 상세 관리</span>
+        </button>
+      </div>
+
+      <!-- 태블릿 화면 켜짐 유지 (Wake Lock) 버튼 -->
+      <button id="wakeLockBtn" class="icon-btn" title="태블릿 화면 꺼짐 방지 (거치대 모드)" aria-label="화면 켜짐 유지">
+        <span id="wakeLockIcon">💡</span>
+      </button>
+
+      <!-- 테마 선택 드롭다운 -->
+      <div class="theme-dropdown">
+        <button id="themeMenuBtn" class="icon-btn" title="위젯 테마 변경" aria-label="테마 변경">
+          <span id="currentThemeIcon">🎨</span>
+        </button>
+        <div id="themeMenu" class="theme-menu">
+          <button class="theme-option-btn" data-theme="light">☀️ 라이트</button>
+          <button class="theme-option-btn" data-theme="dark">🌙 다크 (OLED)</button>
+          <button class="theme-option-btn" data-theme="sakura">🌸 벚꽃 핑크</button>
+          <button class="theme-option-btn" data-theme="mint">🌿 민트 포레스트</button>
+        </div>
+      </div>
+
+      <!-- 전체화면 토글 (전자칠판/태블릿 전체화면) -->
+      <button id="fullscreenToggleBtn" class="icon-btn" title="전체화면 모드" aria-label="전체화면">
+        <span id="fullscreenIcon">🖥️</span>
+      </button>
+
+      <!-- 축하 폭죽 -->
+      <button id="confettiFireBtn" class="icon-btn" title="졸업 축하 팡파레!" aria-label="축하 팡파레">
+        <span>🎉</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= 1. 태블릿 메인 위젯 카드 ================= -->
+  <main class="widget-container">
+    <section class="tablet-widget-card" id="tabletWidgetCard">
+      <!-- 위젯 상단: D-Day 타겟 뱃지 & 실시간 타이머 -->
+      <div class="widget-header-row">
+        <div class="widget-badge">
+          <span class="pulse-ping"></span>
+          <span id="targetGraduationLabel">2026년 12월 30일 졸업식 기준</span>
+        </div>
+
+        <div class="widget-live-clock" title="현재 시각 &amp; 졸업식 실시간 카운트다운">
+          <span>⏳</span>
+          <div class="clock-digit-group"><strong id="clockDays">--</strong>일</div>
+          <span class="clock-sep">:</span>
+          <div class="clock-digit-group"><strong id="clockHours">--</strong>시</div>
+          <span class="clock-sep">:</span>
+          <div class="clock-digit-group"><strong id="clockMinutes">--</strong>분</div>
+          <span class="clock-sep">:</span>
+          <div class="clock-digit-group"><strong id="clockSeconds">--</strong>초</div>
+        </div>
+      </div>
+
+      <!-- 위젯 핵심 지표 (D-Day vs 순수 등교일) -->
+      <div class="widget-main-grid">
+        <!-- 1) 총 D-Day -->
+        <div class="widget-dday-cell">
+          <div class="widget-cell-label">
+            <span>📅</span> 총 남은 날짜 (달력 기준)
+          </div>
+          <div class="widget-dday-value-wrap">
+            <span class="widget-dday-prefix">D-</span>
+            <span class="widget-dday-number" id="totalDDayNumber">--</span>
+          </div>
+          <p class="widget-dday-sub" id="calendarPeriodText">기준일부터 졸업식까지의 전체 일수</p>
+        </div>
+
+        <!-- 세로 구분선 -->
+        <div class="widget-divider-v"></div>
+
+        <!-- 2) 실제 등교일 (핵심 강조) -->
+        <div class="widget-school-card">
+          <div class="widget-school-label">
+            <span>🎒 실제 등교일 (주말·공휴일 제외)</span>
+          </div>
+          <div class="widget-school-value-wrap">
+            <span class="widget-school-number" id="schoolDaysNumber">--</span>
+            <span class="widget-school-unit">일 남음!</span>
+          </div>
+          <p class="widget-school-desc" id="schoolDaysTip">
+            주말, 법정 공휴일, 재량휴업일을 뺀 진짜 학교 가는 날
+          </p>
+        </div>
+      </div>
+
+      <!-- 위젯 미니 통계 4분할 바 -->
+      <div class="widget-substats-row">
+        <div class="substat-pill">
+          <div class="substat-icon">🍱</div>
+          <div class="substat-data">
+            <span class="substat-label">남은 급식</span>
+            <div class="substat-val"><span id="statLunchCount">--</span><small>끼</small></div>
+          </div>
+        </div>
+
+        <div class="substat-pill">
+          <div class="substat-icon">🏖️</div>
+          <div class="substat-data">
+            <span class="substat-label">주말 휴일</span>
+            <div class="substat-val"><span id="statWeekendDays">--</span><small>일</small></div>
+          </div>
+        </div>
+
+        <div class="substat-pill">
+          <div class="substat-icon">🇰🇷</div>
+          <div class="substat-data">
+            <span class="substat-label">법정 공휴일</span>
+            <div class="substat-val"><span id="statHolidayDays">--</span><small>일</small></div>
+          </div>
+        </div>
+
+        <div class="substat-pill">
+          <div class="substat-icon">✏️</div>
+          <div class="substat-data">
+            <span class="substat-label">재량휴업일</span>
+            <div class="substat-val"><span id="statCustomDays">--</span><small>일</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 위젯 프로그레스 바 -->
+      <div class="widget-progress-box">
+        <div class="progress-top-info">
+          <span>졸업까지 남은 날짜 구성비</span>
+          <span id="progressRatioText">등교 0% vs 쉼 0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="prog-bar-school" id="schoolProgressSegment" style="width: 50%" title="등교일"></div>
+          <div class="prog-bar-rest" id="holidayProgressSegment" style="width: 50%" title="휴일/주말"></div>
+        </div>
+        <div class="progress-legend-row">
+          <span>🎒 등교: <strong id="legendSchoolCount">--일</strong></span>
+          <span>🏖️ 주말: <strong id="legendWeekendCount">--일</strong></span>
+          <span>🇰🇷 공휴: <strong id="legendHolidayCount">--일</strong></span>
+          <span>✏️ 재량: <strong id="legendCustomCount">--일</strong></span>
+        </div>
+      </div>
+
+      <!-- 위젯 하단 졸업 응원 문구 -->
+      <div class="widget-quote-ticker">
+        <div class="widget-quote-text">
+          <span>💌</span>
+          <span id="dailyQuoteText">"남은 시간 동안 친구들과 잊지 못할 추억을 많이 만들어보세요!"</span>
+        </div>
+        <div class="widget-touch-guide" id="widgetTouchTip">
+          💡 태블릿 위젯 전용 모드
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= 2. 상세 관리 패널 & 스마트 캘린더 (FULL MODE) ================= -->
+  <div class="detail-management-container" id="detailManagementSection">
+    <!-- 날짜 설정 카드 -->
+    <section class="glass-card">
+      <div class="card-header-bar">
+        <h2 class="card-header-title">⚙️ 기준일 &amp; 졸업식 날짜 설정</h2>
+        <button id="resetDefaultsBtn" class="btn-pill" title="기본값으로 되돌리기">기본값 리셋</button>
+      </div>
+
+      <div class="settings-grid">
+        <div class="form-group">
+          <label for="baseDateInput">기준일 (오늘 또는 시작일)</label>
+          <div class="input-action-wrap">
+            <input type="date" id="baseDateInput" class="styled-input">
+            <button id="setTodayBtn" class="btn-pill">오늘</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="gradDateInput">졸업식 날짜</label>
+          <div class="input-action-wrap">
+            <input type="date" id="gradDateInput" class="styled-input">
+            <button id="setDec30Btn" class="btn-pill">12.30</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>연산 세부 옵션</label>
+          <div class="checkbox-list">
+            <label class="check-label" title="기준일 당일도 학교에 가는 날로 포함할지">
+              <input type="checkbox" id="includeBaseDayCheck" checked>
+              <span>오늘(기준일) 등교일 계산에 포함</span>
+            </label>
+            <label class="check-label" title="졸업식 당일도 등교일로 계산할지">
+              <input type="checkbox" id="includeGradDayCheck" checked>
+              <span>졸업식 당일 등교일로 포함</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 인터랙티브 스마트 캘린더 -->
+    <section class="glass-card">
+      <div class="card-header-bar">
+        <div>
+          <h2 class="card-header-title">📅 졸업식 스마트 캘린더</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+            💡 날짜를 <strong>터치</strong>하면 간편하게 <span style="color:var(--school-accent);font-weight:800;">등교일</span>과 <span style="color:var(--color-custom);font-weight:800;">재량휴업일</span>을 맞바꿀 수 있습니다.
+          </p>
+        </div>
+        <div class="calendar-month-tabs" id="monthSelector"></div>
+      </div>
+
+      <!-- 캘린더 렌더 영역 -->
+      <div id="calendarWrapper"></div>
+
+      <!-- 캘린더 범례 -->
+      <div class="cal-legend-row">
+        <div class="legend-chip"><span class="dot-chip" style="background:#2563eb;"></span> 등교일</div>
+        <div class="legend-chip"><span class="dot-chip" style="background:#ea580c;"></span> 주말 (토/일)</div>
+        <div class="legend-chip"><span class="dot-chip" style="background:#dc2626;"></span> 법정 공휴일</div>
+        <div class="legend-chip"><span class="dot-chip" style="background:#7c3aed;"></span> 재량휴업/지정휴일</div>
+        <div class="legend-chip"><span class="dot-chip" style="background:#e11d48;"></span> 🎓 졸업식</div>
+      </div>
+    </section>
+
+    <!-- 재량휴업일 & 공휴일 관리 -->
+    <section class="glass-card">
+      <div class="card-header-bar">
+        <h2 class="card-header-title">🗓️ 쉬는 날 &amp; 재량휴업일 목록</h2>
+        <div style="display:flex; gap:0.5rem;">
+          <button id="addCustomHolidayBtn" class="btn-pill btn-primary-pill">+ 재량휴업일 추가</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.6rem; margin-bottom:1rem; flex-wrap:wrap;">
+        <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted); align-self:center;">빠른 학사일정:</span>
+        <button id="presetSuneungBtn" class="btn-pill">🎓 수능일(11월 셋째 목) 휴교</button>
+        <button id="presetBridgeOctBtn" class="btn-pill">🍂 10월 징검다리 휴업</button>
+      </div>
+
+      <div class="holiday-scroll-box" id="holidayListContainer"></div>
+    </section>
+
+    <!-- 요약 공유 카드 -->
+    <section class="glass-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h3 style="font-size:1.1rem; font-weight:800;">📋 태블릿 위젯 요약 공유</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted);">남은 D-Day와 순수 등교일 통계를 카카오톡, 밴드, 클래스룸에 공유하세요.</p>
+      </div>
+      <div style="display:flex; gap:0.6rem;">
+        <button id="copySummaryBtn" class="btn-pill btn-primary-pill">
+          <span>📋 결과 텍스트 복사</span>
+        </button>
+        <button id="shareStandTipBtn" class="btn-pill">
+          <span>📱 태블릿 홈 위젯 추가 팁</span>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="app-footer">
+    <p>🎓 졸업식 D-Day &amp; 순수 등교일 위젯 &copy; 2026</p>
+    <p style="color:var(--text-light); font-size:0.78rem; margin-top:0.25rem;">
+      태블릿 브라우저(사파리/크롬) 메뉴에서 <strong>'홈 화면에 추가'</strong>를 누르면 전체화면 위젯 앱처럼 사용하실 수 있습니다.
+    </p>
+  </footer>
+
+  <!-- 재량휴업일 추가 모달 -->
+  <dialog id="customHolidayModal" class="dialog-modal">
+    <div class="modal-content-card">
+      <div class="card-header-bar" style="margin-bottom:1rem;">
+        <h3 style="font-size:1.15rem; font-weight:800;">✏️ 재량휴업일 / 특별 휴일 추가</h3>
+        <button id="closeModalBtn" style="font-size:1.4rem; color:var(--text-muted);">&times;</button>
+      </div>
+      <form id="customHolidayForm" method="dialog">
+        <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.25rem;">
+          <div class="form-group">
+            <label for="customHolidayDate">날짜 선택</label>
+            <input type="date" id="customHolidayDate" class="styled-input" required>
+          </div>
+          <div class="form-group">
+            <label for="customHolidayTitle">휴일 명칭</label>
+            <input type="text" id="customHolidayTitle" class="styled-input" placeholder="예: 개교기념일, 재량휴업일, 축제 다음날" required>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+          <button type="button" id="cancelModalBtn" class="btn-pill">취소</button>
+          <button type="submit" class="btn-pill btn-primary-pill">등록하기</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 홈 화면 위젯 추가 안내 모달 -->
+  <dialog id="tabletTipModal" class="dialog-modal">
+    <div class="modal-content-card">
+      <div class="card-header-bar" style="margin-bottom:1rem;">
+        <h3 style="font-size:1.15rem; font-weight:800;">📱 태블릿에서 위젯처럼 쓰는 법</h3>
+        <button id="closeTipModalBtn" style="font-size:1.4rem; color:var(--text-muted);">&times;</button>
+      </div>
+      <div style="font-size:0.9rem; line-height:1.65; color:var(--text-main); display:flex; flex-direction:column; gap:0.85rem;">
+        <div>
+          <strong>🍎 iPad (Safari) 사용자:</strong><br>
+          브라우저 상단 공유 버튼(네모+화살표) ➔ <strong>[홈 화면에 추가]</strong>를 누르시면 상단 주소창이 사라지고 독립된 위젯 앱처럼 실행됩니다.
+        </div>
+        <div>
+          <strong>🤖 갤럭시 탭 / 안드로이드 (Chrome) 사용자:</strong><br>
+          브라우저 우측 상단 메뉴(점 3개) ➔ <strong>[앱 설치]</strong> 또는 <strong>[홈 화면에 추가]</strong>를 누르시면 됩니다.
+        </div>
+        <div>
+          <strong>💡 태블릿 거치대 팁:</strong><br>
+          상단의 <strong>'📱 위젯 모드'</strong>를 누르고 <strong>'💡'</strong> 화면 켜짐 유지 버튼을 켜두면 태블릿을 책상에 세워두고 상시 졸업식 카운터로 활용할 수 있습니다!
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:1.25rem;">
+        <button type="button" id="confirmTipModalBtn" class="btn-pill btn-primary-pill">확인</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 캔버스 폭죽 & 토스트 컨테이너 -->
+  <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+  <div id="toastContainer" aria-live="polite"></div>
+
+  <!-- ================= 자바스크립트 로직 ================= -->
+  <script>
+    // 대한민국 공휴일 데이터베이스 (2024 ~ 2030)
+    const OFFICIAL_HOLIDAYS_DB = {
+      // 2024년
+      "2024-01-01": "신정",
+      "2024-02-09": "설날 연휴",
+      "2024-02-10": "설날",
+      "2024-02-11": "설날 연휴",
+      "2024-02-12": "설날 대체공휴일",
+      "2024-03-01": "3·1절",
+      "2024-04-10": "제22대 국회의원선거",
+      "2024-05-05": "어린이날",
+      "2024-05-06": "어린이날 대체공휴일",
+      "2024-05-15": "부처님오신날",
+      "2024-06-06": "현충일",
+      "2024-08-15": "광복절",
+      "2024-09-16": "추석 연휴",
+      "2024-09-17": "추석",
+      "2024-09-18": "추석 연휴",
+      "2024-10-01": "국군의 날",
+      "2024-10-03": "개천절",
+      "2024-10-09": "한글날",
+      "2024-12-25": "성탄절",
+
+      // 2025년
+      "2025-01-01": "신정",
+      "2025-01-28": "설날 연휴",
+      "2025-01-29": "설날",
+      "2025-01-30": "설날 연휴",
+      "2025-03-01": "3·1절",
+      "2025-03-03": "3·1절 대체공휴일",
+      "2025-05-05": "어린이날/부처님오신날",
+      "2025-05-06": "대체공휴일",
+      "2025-06-06": "현충일",
+      "2025-08-15": "광복절",
+      "2025-10-03": "개천절",
+      "2025-10-05": "추석 연휴",
+      "2025-10-06": "추석",
+      "2025-10-07": "추석 연휴",
+      "2025-10-08": "추석 대체공휴일",
+      "2025-10-09": "한글날",
+      "2025-12-25": "성탄절",
+
+      // 2026년
+      "2026-01-01": "신정",
+      "2026-02-16": "설날 연휴",
+      "2026-02-17": "설날",
+      "2026-02-18": "설날 연휴",
+      "2026-03-01": "3·1절",
+      "2026-03-02": "3·1절 대체공휴일",
+      "2026-05-05": "어린이날",
+      "2026-05-24": "부처님오신날",
+      "2026-05-25": "부처님오신날 대체공휴일",
+      "2026-06-06": "현충일",
+      "2026-08-15": "광복절",
+      "2026-08-17": "광복절 대체공휴일",
+      "2026-09-24": "추석 연휴",
+      "2026-09-25": "추석",
+      "2026-09-26": "추석 연휴",
+      "2026-09-28": "추석 대체공휴일",
+      "2026-10-03": "개천절",
+      "2026-10-05": "개천절 대체공휴일",
+      "2026-10-09": "한글날",
+      "2026-12-25": "성탄절",
+
+      // 2027년
+      "2027-01-01": "신정",
+      "2027-02-06": "설날 연휴",
+      "2027-02-07": "설날",
+      "2027-02-08": "설날 연휴",
+      "2027-02-09": "설날 대체공휴일",
+      "2027-03-01": "3·1절",
+      "2027-05-05": "어린이날",
+      "2027-05-13": "부처님오신날",
+      "2027-06-06": "현충일",
+      "2027-08-15": "광복절",
+      "2027-08-16": "광복절 대체공휴일",
+      "2027-09-14": "추석 연휴",
+      "2027-09-15": "추석",
+      "2027-09-16": "추석 연휴",
+      "2027-10-03": "개천절",
+      "2027-10-04": "개천절 대체공휴일",
+      "2027-10-09": "한글날",
+      "2027-10-11": "한글날 대체공휴일",
+      "2027-12-25": "성탄절",
+      "2027-12-27": "성탄절 대체공휴일"
+    };
+
+    const GRADUATION_QUOTES = [
+      "남은 시간 동안 친구들과 잊지 못할 추억을 많이 만들어보세요!",
+      "졸업은 끝이 아니라, 여러분만의 더 넓은 세상으로 나아가는 멋진 출발입니다.",
+      "하루하루 아침 조례와 급식 시간, 소소한 모든 순간들이 훗날 빛나는 보물이 됩니다.",
+      "매일의 등교길이 친구들과의 소중한 이야기로 가득 차길 응원합니다.",
+      "남은 등교일 동안 더 활짝 웃고, 더 따뜻한 인사를 나누어보아요!"
+    ];
+
+    class GraduationWidgetApp {
+      constructor() {
+        this.customHolidaysKey = 'grad_custom_holidays_tablet';
+        this.themeKey = 'grad_theme_tablet';
+        this.viewModeKey = 'grad_view_mode_tablet';
+        this.activeMonthTab = 'ALL';
+        this.wakeLock = null;
+
+        this.customHolidays = this.loadCustomHolidays();
+
+        this.initDom();
+        this.initDates();
+        this.initEvents();
+        this.initTheme();
+        this.initViewMode();
+        this.initQuotes();
+        this.initConfetti();
+
+        this.calculate();
+        setInterval(() => this.updateRealtimeClock(), 1000);
+      }
+
+      loadCustomHolidays() {
+        try {
+          const raw = localStorage.getItem(this.customHolidaysKey);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      saveCustomHolidays() {
+        try {
+          localStorage.setItem(this.customHolidaysKey, JSON.stringify(this.customHolidays));
+        } catch (e) {}
+      }
+
+      initDom() {
+        // 탑바
+        this.viewWidgetBtn = document.getElementById('viewWidgetBtn');
+        this.viewFullBtn = document.getElementById('viewFullBtn');
+        this.wakeLockBtn = document.getElementById('wakeLockBtn');
+        this.wakeLockIcon = document.getElementById('wakeLockIcon');
+        this.themeMenuBtn = document.getElementById('themeMenuBtn');
+        this.themeMenu = document.getElementById('themeMenu');
+        this.currentThemeIcon = document.getElementById('currentThemeIcon');
+        this.fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
+        this.fullscreenIcon = document.getElementById('fullscreenIcon');
+        this.confettiFireBtn = document.getElementById('confettiFireBtn');
+
+        // 위젯 카드
+        this.targetGraduationLabel = document.getElementById('targetGraduationLabel');
+        this.totalDDayNumber = document.getElementById('totalDDayNumber');
+        this.schoolDaysNumber = document.getElementById('schoolDaysNumber');
+        this.schoolDaysTip = document.getElementById('schoolDaysTip');
+        this.calendarPeriodText = document.getElementById('calendarPeriodText');
+
+        // 타이머
+        this.clockDays = document.getElementById('clockDays');
+        this.clockHours = document.getElementById('clockHours');
+        this.clockMinutes = document.getElementById('clockMinutes');
+        this.clockSeconds = document.getElementById('clockSeconds');
+
+        // 서브 스탯
+        this.statLunchCount = document.getElementById('statLunchCount');
+        this.statWeekendDays = document.getElementById('statWeekendDays');
+        this.statHolidayDays = document.getElementById('statHolidayDays');
+        this.statCustomDays = document.getElementById('statCustomDays');
+
+        // 프로그레스
+        this.schoolProgressSegment = document.getElementById('schoolProgressSegment');
+        this.holidayProgressSegment = document.getElementById('holidayProgressSegment');
+        this.progressRatioText = document.getElementById('progressRatioText');
+        this.legendSchoolCount = document.getElementById('legendSchoolCount');
+        this.legendWeekendCount = document.getElementById('legendWeekendCount');
+        this.legendHolidayCount = document.getElementById('legendHolidayCount');
+        this.legendCustomCount = document.getElementById('legendCustomCount');
+
+        // 인용구
+        this.dailyQuoteText = document.getElementById('dailyQuoteText');
+
+        // 세팅 및 관리
+        this.detailManagementSection = document.getElementById('detailManagementSection');
+        this.baseDateInput = document.getElementById('baseDateInput');
+        this.gradDateInput = document.getElementById('gradDateInput');
+        this.setTodayBtn = document.getElementById('setTodayBtn');
+        this.setDec30Btn = document.getElementById('setDec30Btn');
+        this.resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+        this.includeBaseDayCheck = document.getElementById('includeBaseDayCheck');
+        this.includeGradDayCheck = document.getElementById('includeGradDayCheck');
+
+        // 캘린더 & 리스트
+        this.calendarWrapper = document.getElementById('calendarWrapper');
+        this.monthSelector = document.getElementById('monthSelector');
+        this.holidayListContainer = document.getElementById('holidayListContainer');
+
+        // 모달들
+        this.customHolidayModal = document.getElementById('customHolidayModal');
+        this.addCustomHolidayBtn = document.getElementById('addCustomHolidayBtn');
+        this.closeModalBtn = document.getElementById('closeModalBtn');
+        this.cancelModalBtn = document.getElementById('cancelModalBtn');
+        this.customHolidayForm = document.getElementById('customHolidayForm');
+        this.customHolidayDate = document.getElementById('customHolidayDate');
+        this.customHolidayTitle = document.getElementById('customHolidayTitle');
+
+        this.presetSuneungBtn = document.getElementById('presetSuneungBtn');
+        this.presetBridgeOctBtn = document.getElementById('presetBridgeOctBtn');
+
+        this.copySummaryBtn = document.getElementById('copySummaryBtn');
+        this.shareStandTipBtn = document.getElementById('shareStandTipBtn');
+        this.tabletTipModal = document.getElementById('tabletTipModal');
+        this.closeTipModalBtn = document.getElementById('closeTipModalBtn');
+        this.confirmTipModalBtn = document.getElementById('confirmTipModalBtn');
+
+        this.toastContainer = document.getElementById('toastContainer');
+      }
+
+      initDates() {
+        const now = new Date();
+        const curYear = now.getFullYear();
+        this.baseDateInput.value = this.formatDate(now);
+
+        let gradYear = curYear;
+        const thisYearDec30 = new Date(curYear, 11, 30);
+        if (now > thisYearDec30) {
+          gradYear = curYear + 1;
+        }
+        this.gradDateInput.value = `${gradYear}-12-30`;
+      }
+
+      initEvents() {
+        // 날짜/옵션 변경
+        this.baseDateInput.addEventListener('change', () => this.calculate());
+        this.gradDateInput.addEventListener('change', () => this.calculate());
+        this.includeBaseDayCheck.addEventListener('change', () => this.calculate());
+        this.includeGradDayCheck.addEventListener('change', () => this.calculate());
+
+        this.setTodayBtn.addEventListener('click', () => {
+          this.baseDateInput.value = this.formatDate(new Date());
+          this.calculate();
+          this.showToast('기준일을 오늘로 설정했습니다.');
+        });
+
+        this.setDec30Btn.addEventListener('click', () => {
+          const y = new Date(this.baseDateInput.value).getFullYear() || new Date().getFullYear();
+          this.gradDateInput.value = `${y}-12-30`;
+          this.calculate();
+          this.showToast(`졸업식 날짜를 ${y}년 12월 30일로 설정했습니다.`);
+        });
+
+        this.resetDefaultsBtn.addEventListener('click', () => {
+          this.customHolidays = {};
+          this.saveCustomHolidays();
+          this.initDates();
+          this.includeBaseDayCheck.checked = true;
+          this.includeGradDayCheck.checked = true;
+          this.calculate();
+          this.showToast('설정과 재량휴업일을 초기화했습니다.');
+        });
+
+        // 뷰 모드 토글 (위젯 모드 vs 전체 모드)
+        this.viewWidgetBtn.addEventListener('click', () => this.setViewMode('widget'));
+        this.viewFullBtn.addEventListener('click', () => this.setViewMode('full'));
+
+        // Wake Lock (태블릿 화면 꺼짐 방지)
+        this.wakeLockBtn.addEventListener('click', () => this.toggleWakeLock());
+
+        // 테마 메뉴 드롭다운
+        this.themeMenuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.themeMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', () => this.themeMenu.classList.remove('show'));
+
+        this.themeMenu.querySelectorAll('.theme-option-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const theme = btn.dataset.theme;
+            this.setTheme(theme);
+            this.themeMenu.classList.remove('show');
+          });
+        });
+
+        // 전체화면
+        this.fullscreenToggleBtn.addEventListener('click', () => this.toggleFullscreen());
+        document.addEventListener('fullscreenchange', () => {
+          if (document.fullscreenElement) {
+            this.fullscreenIcon.textContent = '✖️';
+          } else {
+            this.fullscreenIcon.textContent = '🖥️';
+          }
+        });
+
+        // 폭죽
+        this.confettiFireBtn.addEventListener('click', () => {
+          this.fireConfetti();
+          this.showToast('🎉 졸업을 축하합니다! 새로운 시작을 힘차게 응원해요!');
+        });
+
+        // 재량휴업일 모달
+        this.addCustomHolidayBtn.addEventListener('click', () => {
+          this.customHolidayDate.value = this.baseDateInput.value;
+          this.customHolidayTitle.value = '';
+          this.customHolidayModal.showModal();
+        });
+        this.closeModalBtn.addEventListener('click', () => this.customHolidayModal.close());
+        this.cancelModalBtn.addEventListener('click', () => this.customHolidayModal.close());
+
+        this.customHolidayForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const d = this.customHolidayDate.value;
+          const t = this.customHolidayTitle.value.trim() || '재량휴업일';
+          if (d) {
+            this.customHolidays[d] = t;
+            this.saveCustomHolidays();
+            this.customHolidayModal.close();
+            this.calculate();
+            this.showToast(`[${d}] ${t} 등록 완료!`);
+          }
+        });
+
+        // 프리셋 버튼
+        this.presetSuneungBtn.addEventListener('click', () => {
+          const y = new Date(this.gradDateInput.value).getFullYear();
+          const suneung = this.getSuneungDate(y);
+          const dStr = this.formatDate(suneung);
+          this.customHolidays[dStr] = '대학수학능력시험일(휴교)';
+          this.saveCustomHolidays();
+          this.calculate();
+          this.showToast(`${y}년 수능일(${dStr}) 휴교 등록 완료!`);
+        });
+
+        this.presetBridgeOctBtn.addEventListener('click', () => {
+          const y = new Date(this.gradDateInput.value).getFullYear();
+          let added = [];
+          [`${y}-10-02`, `${y}-10-04`].forEach(dStr => {
+            const dt = new Date(dStr);
+            const day = dt.getDay();
+            if (day !== 0 && day !== 6 && !OFFICIAL_HOLIDAYS_DB[dStr]) {
+              this.customHolidays[dStr] = '징검다리 재량휴업일';
+              added.push(dStr);
+            }
+          });
+          if (added.length) {
+            this.saveCustomHolidays();
+            this.calculate();
+            this.showToast(`10월 징검다리 휴업일(${added.join(', ')}) 등록 완료!`);
+          } else {
+            this.showToast('해당 일자는 주말이거나 이미 공휴일입니다.');
+          }
+        });
+
+        // 공유 및 팁 모달
+        this.copySummaryBtn.addEventListener('click', () => this.copySummary());
+        this.shareStandTipBtn.addEventListener('click', () => this.tabletTipModal.showModal());
+        this.closeTipModalBtn.addEventListener('click', () => this.tabletTipModal.close());
+        this.confirmTipModalBtn.addEventListener('click', () => this.tabletTipModal.close());
+      }
+
+      // 태블릿 스탠드 화면 꺼짐 방지
+      async toggleWakeLock() {
+        if ('wakeLock' in navigator) {
+          if (this.wakeLock) {
+            try {
+              await this.wakeLock.release();
+              this.wakeLock = null;
+              this.wakeLockIcon.textContent = '💡';
+              this.showToast('태블릿 화면 자동 꺼짐 방지가 해제되었습니다.');
+            } catch (err) {}
+          } else {
+            try {
+              this.wakeLock = await navigator.wakeLock.request('screen');
+              this.wakeLockIcon.textContent = '🌟';
+              this.showToast('태블릿 화면 꺼짐 방지 활성화 (거치대 모드 유지)');
+              this.wakeLock.addEventListener('release', () => {
+                this.wakeLock = null;
+                this.wakeLockIcon.textContent = '💡';
+              });
+            } catch (err) {
+              this.showToast('이 브라우저는 화면 켜짐 유지 권한을 허용하지 않습니다.');
+            }
+          }
+        } else {
+          this.showToast('현재 태블릿 환경에서는 화면 켜짐 유지 API를 지원하지 않습니다.');
+        }
+      }
+
+      // 뷰 모드 설정
+      setViewMode(mode) {
+        if (mode === 'widget') {
+          document.body.classList.add('widget-mode-active');
+          this.viewWidgetBtn.classList.add('active');
+          this.viewFullBtn.classList.remove('active');
+          localStorage.setItem(this.viewModeKey, 'widget');
+          this.showToast('📱 태블릿 위젯 모드로 전환되었습니다. (간결한 거치대 뷰)');
+        } else {
+          document.body.classList.remove('widget-mode-active');
+          this.viewFullBtn.classList.add('active');
+          this.viewWidgetBtn.classList.remove('active');
+          localStorage.setItem(this.viewModeKey, 'full');
+        }
+      }
+
+      initViewMode() {
+        const savedMode = localStorage.getItem(this.viewModeKey);
+        if (savedMode === 'widget') {
+          this.setViewMode('widget');
+        }
+      }
+
+      // 테마 설정
+      setTheme(themeName) {
+        document.body.classList.remove('theme-light', 'theme-dark', 'theme-sakura', 'theme-mint');
+        document.body.classList.add(`theme-${themeName}`);
+        localStorage.setItem(this.themeKey, themeName);
+
+        const iconMap = { light: '☀️', dark: '🌙', sakura: '🌸', mint: '🌿' };
+        this.currentThemeIcon.textContent = iconMap[themeName] || '🎨';
+        this.showToast(`위젯 테마가 [${themeName.toUpperCase()}] 모드로 변경되었습니다.`);
+      }
+
+      initTheme() {
+        const saved = localStorage.getItem(this.themeKey) || 'light';
+        this.setTheme(saved);
+      }
+
+      toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+
+      getSuneungDate(year) {
+        let count = 0;
+        for (let d = 1; d <= 30; d++) {
+          const dt = new Date(year, 10, d);
+          if (dt.getDay() === 4) {
+            count++;
+            if (count === 3) return dt;
+          }
+        }
+        return new Date(year, 10, 15);
+      }
+
+      initQuotes() {
+        const q = GRADUATION_QUOTES[Math.floor(Math.random() * GRADUATION_QUOTES.length)];
+        this.dailyQuoteText.textContent = `"${q}"`;
+      }
+
+      // ================= 계산 메인 =================
+      calculate() {
+        const baseDateStr = this.baseDateInput.value;
+        const gradDateStr = this.gradDateInput.value;
+        if (!baseDateStr || !gradDateStr) return;
+
+        const baseDate = new Date(baseDateStr + 'T00:00:00');
+        const gradDate = new Date(gradDateStr + 'T00:00:00');
+
+        const gy = gradDate.getFullYear();
+        const gm = gradDate.getMonth() + 1;
+        const gd = gradDate.getDate();
+        this.targetGraduationLabel.textContent = `${gy}년 ${gm}월 ${gd}일 졸업식 기준`;
+
+        const diffDays = Math.round((gradDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+          this.totalDDayNumber.textContent = `+${Math.abs(diffDays)}`;
+          this.schoolDaysNumber.textContent = '0';
+          this.schoolDaysTip.textContent = '졸업식 날짜가 기준일보다 이전입니다.';
+          this.updateProgress(0, 0, 0, 0, 0);
+          this.renderCalendar([]);
+          this.renderHolidayList([]);
+          return;
+        }
+
+        this.totalDDayNumber.textContent = diffDays;
+        this.calendarPeriodText.textContent = `${baseDateStr}부터 ${gradDateStr}까지`;
+
+        const incBase = this.includeBaseDayCheck.checked;
+        const incGrad = this.includeGradDayCheck.checked;
+
+        let start = new Date(baseDate);
+        if (!incBase) start.setDate(start.getDate() + 1);
+
+        let end = new Date(gradDate);
+        if (!incGrad) end.setDate(end.getDate() - 1);
+
+        const dayRecords = [];
+        let schoolDaysCount = 0;
+        let weekendDaysCount = 0;
+        let holidayDaysCount = 0;
+        let customDaysCount = 0;
+
+        let curr = new Date(start);
+        while (curr <= end) {
+          const dateStr = this.formatDate(curr);
+          const dayOfWeek = curr.getDay();
+          const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+          const isGradDay = (dateStr === gradDateStr);
+
+          const offHoliday = OFFICIAL_HOLIDAYS_DB[dateStr] || this.checkAlgorithmicHoliday(curr);
+          const customHoliday = this.customHolidays[dateStr];
+
+          let type = 'school';
+          let title = '등교일';
+
+          if (isGradDay) {
+            type = 'grad';
+            title = '🎓 졸업식';
+            if (incGrad) schoolDaysCount++;
+          } else if (isWeekend) {
+            type = 'weekend';
+            title = (dayOfWeek === 0 ? '일요일' : '토요일');
+            weekendDaysCount++;
+          } else if (offHoliday) {
+            type = 'holiday';
+            title = offHoliday;
+            holidayDaysCount++;
+          } else if (customHoliday) {
+            type = 'custom';
+            title = customHoliday;
+            customDaysCount++;
+          } else {
+            type = 'school';
+            title = '등교일';
+            schoolDaysCount++;
+          }
+
+          dayRecords.push({ dateStr, date: new Date(curr), dayOfWeek, type, title, isGradDay, isWeekend });
+          curr.setDate(curr.getDate() + 1);
+        }
+
+        // 값 업데이트
+        this.schoolDaysNumber.textContent = schoolDaysCount;
+        this.statLunchCount.textContent = schoolDaysCount;
+        this.statWeekendDays.textContent = weekendDaysCount;
+        this.statHolidayDays.textContent = holidayDaysCount;
+        this.statCustomDays.textContent = customDaysCount;
+
+        this.schoolDaysTip.textContent = `주말 ${weekendDaysCount}일, 공휴일 ${holidayDaysCount}일, 재량휴업 ${customDaysCount}일을 뺀 실제 등교 일수`;
+
+        this.updateProgress(schoolDaysCount, weekendDaysCount, holidayDaysCount, customDaysCount, dayRecords.length);
+        this.renderCalendar(dayRecords, baseDate, gradDate);
+        this.renderHolidayList(dayRecords);
+      }
+
+      checkAlgorithmicHoliday(date) {
+        const m = date.getMonth() + 1;
+        const d = date.getDate();
+        const day = date.getDay();
+
+        if (m === 1 && d === 1) return '신정';
+        if (m === 3 && d === 1) return '3·1절';
+        if (m === 5 && d === 5) return '어린이날';
+        if (m === 6 && d === 6) return '현충일';
+        if (m === 8 && d === 15) return '광복절';
+        if (m === 10 && d === 3) return '개천절';
+        if (m === 10 && d === 9) return '한글날';
+        if (m === 12 && d === 25) return '성탄절';
+
+        if (day === 1) {
+          const sun = new Date(date);
+          sun.setDate(sun.getDate() - 1);
+          const sat = new Date(date);
+          sat.setDate(sat.getDate() - 2);
+
+          const checkSubs = (targetDate) => {
+            const tm = targetDate.getMonth() + 1;
+            const td = targetDate.getDate();
+            if ([3, 5, 8, 10, 12].includes(tm)) {
+              if (tm === 3 && td === 1) return '3·1절 대체공휴일';
+              if (tm === 5 && td === 5) return '어린이날 대체공휴일';
+              if (tm === 8 && td === 15) return '광복절 대체공휴일';
+              if (tm === 10 && td === 3) return '개천절 대체공휴일';
+              if (tm === 10 && td === 9) return '한글날 대체공휴일';
+              if (tm === 12 && td === 25) return '성탄절 대체공휴일';
+            }
+            return null;
+          };
+
+          const fromSun = checkSubs(sun);
+          if (fromSun) return fromSun;
+          const fromSat = checkSubs(sat);
+          if (fromSat) return fromSat;
+        }
+
+        return null;
+      }
+
+      updateProgress(school, weekend, holiday, custom, total) {
+        this.legendSchoolCount.textContent = `${school}일`;
+        this.legendWeekendCount.textContent = `${weekend}일`;
+        this.legendHolidayCount.textContent = `${holiday}일`;
+        this.legendCustomCount.textContent = `${custom}일`;
+
+        if (total === 0) {
+          this.schoolProgressSegment.style.width = '0%';
+          this.holidayProgressSegment.style.width = '0%';
+          this.progressRatioText.textContent = '0%';
+          return;
+        }
+
+        const schoolPercent = Math.round((school / total) * 100);
+        const restPercent = 100 - schoolPercent;
+
+        this.schoolProgressSegment.style.width = `${schoolPercent}%`;
+        this.holidayProgressSegment.style.width = `${restPercent}%`;
+        this.progressRatioText.textContent = `등교 ${schoolPercent}% (${school}일) vs 쉼 ${restPercent}% (${total - school}일)`;
+      }
+
+      updateRealtimeClock() {
+        const gradDateStr = this.gradDateInput.value;
+        if (!gradDateStr) return;
+
+        const now = new Date();
+        const target = new Date(`${gradDateStr}T09:00:00`);
+        const diff = target.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          this.clockDays.textContent = '00';
+          this.clockHours.textContent = '00';
+          this.clockMinutes.textContent = '00';
+          this.clockSeconds.textContent = '00';
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        this.clockDays.textContent = String(days).padStart(2, '0');
+        this.clockHours.textContent = String(hours).padStart(2, '0');
+        this.clockMinutes.textContent = String(minutes).padStart(2, '0');
+        this.clockSeconds.textContent = String(seconds).padStart(2, '0');
+      }
+
+      // ================= 캘린더 =================
+      renderCalendar(dayRecords, baseDate, gradDate) {
+        if (!baseDate || !gradDate || dayRecords.length === 0) {
+          this.calendarWrapper.innerHTML = '<p style="color:var(--text-muted); padding:1rem;">날짜 범위를 올바르게 지정해주세요.</p>';
+          this.monthSelector.innerHTML = '';
+          return;
+        }
+
+        const recordMap = new Map();
+        dayRecords.forEach(r => recordMap.set(r.dateStr, r));
+
+        const months = [];
+        let curYear = baseDate.getFullYear();
+        let curMonth = baseDate.getMonth();
+        const endYear = gradDate.getFullYear();
+        const endMonth = gradDate.getMonth();
+
+        while (curYear < endYear || (curYear === endYear && curMonth <= endMonth)) {
+          months.push({ year: curYear, month: curMonth });
+          curMonth++;
+          if (curMonth > 11) {
+            curMonth = 0;
+            curYear++;
+          }
+        }
+
+        this.renderMonthTabs(months);
+        this.calendarWrapper.innerHTML = '';
+
+        months.forEach(({ year, month }) => {
+          const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+          if (this.activeMonthTab !== 'ALL' && this.activeMonthTab !== monthKey) return;
+
+          const block = document.createElement('div');
+          block.style.marginBottom = '1.75rem';
+
+          let monthSchoolDays = 0;
+          const titleRow = document.createElement('div');
+          titleRow.style.display = 'flex';
+          titleRow.style.justifyContent = 'space-between';
+          titleRow.style.alignItems = 'center';
+          titleRow.style.marginBottom = '0.75rem';
+          titleRow.innerHTML = `<h3 style="font-size:1.1rem; font-weight:800;">🗓️ ${year}년 ${month + 1}월</h3>`;
+
+          const grid = document.createElement('div');
+          grid.className = 'calendar-grid';
+
+          const weekNames = ['일', '월', '화', '수', '목', '금', '토'];
+          weekNames.forEach((w, idx) => {
+            const h = document.createElement('div');
+            h.className = `cal-day-header ${idx === 0 ? 'sun' : idx === 6 ? 'sat' : ''}`;
+            h.textContent = w;
+            grid.appendChild(h);
+          });
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const lastDate = new Date(year, month + 1, 0).getDate();
+
+          for (let i = 0; i < firstDay; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'cal-cell empty';
+            grid.appendChild(empty);
+          }
+
+          const todayStr = this.formatDate(new Date());
+
+          for (let day = 1; day <= lastDate; day++) {
+            const dt = new Date(year, month, day);
+            const dStr = this.formatDate(dt);
+            const dow = dt.getDay();
+
+            const cell = document.createElement('div');
+            cell.className = 'cal-cell';
+            if (dow === 0) cell.classList.add('is-sun');
+            if (dow === 6) cell.classList.add('is-sat');
+            if (dStr === todayStr) cell.classList.add('is-today');
+
+            if (dt < new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate())) {
+              cell.classList.add('is-past');
+            }
+
+            const rec = recordMap.get(dStr);
+            let cellType = 'school';
+            let cellLabel = '등교일';
+
+            if (rec) {
+              cellType = rec.type;
+              cellLabel = rec.title;
+              if (rec.type === 'school' || (rec.isGradDay && this.includeGradDayCheck.checked)) {
+                monthSchoolDays++;
+              }
+            } else if (dt > gradDate) {
+              cellType = 'past-grad';
+              cellLabel = '졸업 이후';
+            } else if (dow === 0 || dow === 6) {
+              cellType = 'weekend';
+              cellLabel = dow === 0 ? '일요일' : '토요일';
+            } else {
+              const off = OFFICIAL_HOLIDAYS_DB[dStr] || this.checkAlgorithmicHoliday(dt);
+              if (off) {
+                cellType = 'holiday';
+                cellLabel = off;
+              } else if (this.customHolidays[dStr]) {
+                cellType = 'custom';
+                cellLabel = this.customHolidays[dStr];
+              }
+            }
+
+            cell.classList.add(`type-${cellType}`);
+            cell.innerHTML = `
+              <div class="cal-cell-top">
+                <span class="cal-cell-num">${day}</span>
+                ${dStr === todayStr ? '<span class="cal-chip-today">오늘</span>' : ''}
+              </div>
+              <div class="cal-cell-status status-${cellType}">${cellLabel}</div>
+            `;
+
+            if (dow !== 0 && dow !== 6 && cellType !== 'holiday' && cellType !== 'grad') {
+              cell.title = '터치하여 등교일 ↔ 재량휴업일 변경';
+              cell.addEventListener('click', () => this.toggleDayStatus(dStr));
+            }
+
+            grid.appendChild(cell);
+          }
+
+          titleRow.innerHTML += `<span style="font-size:0.82rem; font-weight:700; background:var(--primary-subtle); color:var(--primary); padding:0.2rem 0.65rem; border-radius:999px;">등교일: ${monthSchoolDays}일</span>`;
+          block.appendChild(titleRow);
+          block.appendChild(grid);
+          this.calendarWrapper.appendChild(block);
+        });
+      }
+
+      renderMonthTabs(months) {
+        this.monthSelector.innerHTML = '';
+        const allBtn = document.createElement('button');
+        allBtn.className = `month-tab ${this.activeMonthTab === 'ALL' ? 'active' : ''}`;
+        allBtn.textContent = '전체 월';
+        allBtn.addEventListener('click', () => {
+          this.activeMonthTab = 'ALL';
+          this.calculate();
+        });
+        this.monthSelector.appendChild(allBtn);
+
+        months.forEach(({ year, month }) => {
+          const mKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+          const b = document.createElement('button');
+          b.className = `month-tab ${this.activeMonthTab === mKey ? 'active' : ''}`;
+          b.textContent = `${month + 1}월`;
+          b.addEventListener('click', () => {
+            this.activeMonthTab = mKey;
+            this.calculate();
+          });
+          this.monthSelector.appendChild(b);
+        });
+      }
+
+      toggleDayStatus(dateStr) {
+        if (this.customHolidays[dateStr]) {
+          delete this.customHolidays[dateStr];
+          this.saveCustomHolidays();
+          this.calculate();
+          this.showToast(`[${dateStr}] 정상 등교일로 변경되었습니다! 🎒`);
+        } else {
+          this.customHolidays[dateStr] = '재량휴업일';
+          this.saveCustomHolidays();
+          this.calculate();
+          this.showToast(`[${dateStr}] 재량휴업일로 지정되었습니다! 🏖️`);
+        }
+      }
+
+      renderHolidayList(dayRecords) {
+        this.holidayListContainer.innerHTML = '';
+        const holidays = dayRecords.filter(r => r.type === 'holiday' || r.type === 'custom' || r.isGradDay);
+
+        if (holidays.length === 0) {
+          this.holidayListContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.86rem;">기간 내 평일 휴일이 없습니다.</p>';
+          return;
+        }
+
+        holidays.forEach(h => {
+          const row = document.createElement('div');
+          row.className = 'holiday-row-item';
+
+          const isCustom = (h.type === 'custom');
+          const isGrad = (h.type === 'grad');
+
+          row.innerHTML = `
+            <div class="holiday-row-left">
+              <span class="tag-badge" style="background:${isGrad ? 'rgba(225,29,72,0.15)' : isCustom ? 'var(--color-custom-bg)' : 'var(--color-holiday-bg)'}; color:${isGrad ? 'var(--dday-accent)' : isCustom ? 'var(--color-custom)' : 'var(--color-holiday)'};">
+                ${isGrad ? '🎓 졸업' : isCustom ? '✏️ 재량' : '🇰🇷 공휴'}
+              </span>
+              <strong style="font-family:var(--font-display);">${h.dateStr}</strong>
+              <span style="color:var(--text-muted); font-weight:600;">${h.title}</span>
+            </div>
+            ${isCustom ? `
+              <button class="btn-pill" style="color:#dc2626; font-size:0.78rem; padding:0.2rem 0.5rem;" data-date="${h.dateStr}">
+                삭제 ✕
+              </button>
+            ` : ''}
+          `;
+
+          if (isCustom) {
+            row.querySelector('button').addEventListener('click', () => {
+              delete this.customHolidays[h.dateStr];
+              this.saveCustomHolidays();
+              this.calculate();
+              this.showToast(`[${h.dateStr}] 삭제 완료`);
+            });
+          }
+
+          this.holidayListContainer.appendChild(row);
+        });
+      }
+
+      copySummary() {
+        const text = `🎓 [졸업식 D-Day & 등교일 위젯 요약]
+───────────────────────
+📅 기준일: ${this.baseDateInput.value}
+🎓 졸업식: ${this.gradDateInput.value}
+⏳ 총 남은 일수: D-${this.totalDDayNumber.textContent}일
+🎒 순수 등교일: ${this.schoolDaysNumber.textContent}일 남음!
+🍱 남은 급식 횟수: ${this.statLunchCount.textContent}끼
+🏖️ 주말 일수: ${this.statWeekendDays.textContent}일
+🇰🇷 공휴일: ${this.statHolidayDays.textContent}일
+✏️ 재량휴업: ${this.statCustomDays.textContent}일
+───────────────────────
+✨ 소중한 친구들과 매일매일 행복한 추억 만드세요! 🎉`;
+
+        navigator.clipboard.writeText(text).then(() => {
+          this.showToast('📋 요약 텍스트가 클립보드에 복사되었습니다!');
+        }).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          this.showToast('📋 요약 텍스트가 복사되었습니다!');
+        });
+      }
+
+      showToast(msg) {
+        const old = document.querySelector('.toast-box');
+        if (old) old.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-box';
+        toast.innerHTML = `<span>🔔</span> <span>${msg}</span>`;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 2900);
+      }
+
+      formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      // 폭죽 파티클
+      initConfetti() {
+        this.confettiCanvas = document.getElementById('confettiCanvas');
+        this.ctx = this.confettiCanvas.getContext('2d');
+        this.particles = [];
+        this.animating = false;
+
+        window.addEventListener('resize', () => this.resizeCanvas());
+        this.resizeCanvas();
+      }
+
+      resizeCanvas() {
+        this.confettiCanvas.width = window.innerWidth;
+        this.confettiCanvas.height = window.innerHeight;
+      }
+
+      fireConfetti() {
+        this.resizeCanvas();
+        const colors = ['#e11d48', '#8b5cf6', '#2563eb', '#059669', '#d97706', '#ec4899', '#6366f1'];
+        for (let i = 0; i < 110; i++) {
+          this.particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.5) * 18 - 4,
+            gravity: 0.35,
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 10,
+            opacity: 1
+          });
+        }
+
+        if (!this.animating) {
+          this.animating = true;
+          this.loopConfetti();
+        }
+      }
+
+      loopConfetti() {
+        if (!this.animating) return;
+        this.ctx.clearRect(0, 0, this.confettiCanvas.width, this.confettiCanvas.height);
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.rotation += p.rotSpeed;
+          p.opacity -= 0.01;
+
+          if (p.opacity <= 0 || p.y > this.confettiCanvas.height + 50) {
+            this.particles.splice(i, 1);
+            continue;
+          }
+
+          this.ctx.save();
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate((p.rotation * Math.PI) / 180);
+          this.ctx.fillStyle = p.color;
+          this.ctx.globalAlpha = Math.max(0, p.opacity);
+          this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          this.ctx.restore();
+        }
+
+        if (this.particles.length > 0) {
+          requestAnimationFrame(() => this.loopConfetti());
+        } else {
+          this.animating = false;
+          this.ctx.clearRect(0, 0, this.confettiCanvas.width, this.confettiCanvas.height);
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.app = new GraduationWidgetApp();
+    });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>
