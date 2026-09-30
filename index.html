@@ -19,7 +19,9 @@
   <!-- 웹폰트 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- 폰트는 비차단 로드: 학내망에서 폰트 서버가 막혀도 화면이 먼저 뜸 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'">
 
   <style>
     /* ========================================================
@@ -67,8 +69,8 @@
       --shadow-widget: 0 16px 36px -10px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(255, 255, 255, 0.7) inset;
       --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
 
-      --font-base: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-      --font-display: 'Outfit', 'Pretendard', sans-serif;
+      --font-base: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+      --font-display: 'Outfit', 'Pretendard Variable', 'Pretendard', sans-serif;
       --transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
 

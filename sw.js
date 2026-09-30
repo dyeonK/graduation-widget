@@ -1,5 +1,5 @@
-// 네트워크 우선, 실패 시 캐시 (오프라인에서도 위젯 동작)
-const CACHE = 'grad-widget-v1';
+// 캐시 우선 + 백그라운드 갱신: 네트워크가 느리거나 막혀도 즉시 표시
+const CACHE = 'grad-widget-v2';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -14,13 +14,18 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request)
+  e.respondWith(caches.open(CACHE).then(async cache => {
+    const cached = await cache.match(e.request, { ignoreSearch: true });
+    const network = fetch(e.request)
       .then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
+        if (res.ok || res.type === 'opaque') cache.put(e.request, res.clone());
         return res;
       })
-      .catch(() => caches.match(e.request, { ignoreSearch: true }))
-  );
+      .catch(() => cached);
+    if (cached) {
+      e.waitUntil(network);
+      return cached;
+    }
+    return network;
+  }));
 });
