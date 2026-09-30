@@ -1,5 +1,5 @@
 // 캐시 우선 + 백그라운드 갱신: 네트워크가 느리거나 막혀도 즉시 표시
-const CACHE = 'grad-widget-v2';
+const CACHE = 'grad-widget-v3';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -14,6 +14,8 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // APK는 캐시하지 않고 항상 최신 파일을 받는다
+  if (new URL(e.request.url).pathname.endsWith('.apk')) return;
   e.respondWith(caches.open(CACHE).then(async cache => {
     const cached = await cache.match(e.request, { ignoreSearch: true });
     const network = fetch(e.request)
