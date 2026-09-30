@@ -1160,10 +1160,11 @@
         <span id="fullscreenIcon">🖥️</span>
       </button>
 
-      <!-- 축하 폭죽 -->
-      <button id="confettiFireBtn" class="icon-btn" title="졸업 축하 팡파레!" aria-label="축하 팡파레">
-        <span>🎉</span>
-      </button>
+      <!-- 안드로이드 홈 화면 위젯 앱 다운로드 -->
+      <a href="graduation-widget.apk" download="졸업D-Day위젯.apk" class="icon-btn" style="text-decoration:none;"
+         title="안드로이드 홈 화면 위젯 앱(APK) 받기" aria-label="안드로이드 위젯 앱 받기">
+        <span>📲</span>
+      </a>
     </div>
   </header>
 
@@ -1385,9 +1386,6 @@
         <button id="shareStandTipBtn" class="btn-pill">
           <span>📱 태블릿 홈 위젯 추가 팁</span>
         </button>
-        <a href="graduation-widget.apk" download="졸업D-Day위젯.apk" class="btn-pill" style="text-decoration:none;">
-          <span>🤖 안드로이드 위젯 앱 받기 (APK)</span>
-        </a>
       </div>
     </section>
   </div>
@@ -1606,7 +1604,6 @@
         this.currentThemeIcon = document.getElementById('currentThemeIcon');
         this.fullscreenToggleBtn = document.getElementById('fullscreenToggleBtn');
         this.fullscreenIcon = document.getElementById('fullscreenIcon');
-        this.confettiFireBtn = document.getElementById('confettiFireBtn');
 
         // 위젯 카드
         this.targetGraduationLabel = document.getElementById('targetGraduationLabel');
@@ -1748,12 +1745,6 @@
           } else {
             this.fullscreenIcon.textContent = '🖥️';
           }
-        });
-
-        // 폭죽
-        this.confettiFireBtn.addEventListener('click', () => {
-          this.fireConfetti();
-          this.showToast('🎉 졸업을 축하합니다! 새로운 시작을 힘차게 응원해요!');
         });
 
         // 재량휴업일 모달

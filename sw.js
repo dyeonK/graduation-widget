@@ -1,5 +1,5 @@
 // 캐시 우선 + 백그라운드 갱신: 네트워크가 느리거나 막혀도 즉시 표시
-const CACHE = 'grad-widget-v3';
+const CACHE = 'grad-widget-v4';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
